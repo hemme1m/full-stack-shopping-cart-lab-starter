@@ -40,8 +40,8 @@ app.get("/api/items", function(req, res) {
 // TODO Handle this URL with appropriate Database interaction.
 
 app.post("/api/items", function(req, res) {
-	var sql = "INSERT INTO shoppingcart (product, price) VALUES ($1::text, $2::float)";
-	var values = [req.body.product, req.body.price];
+	var sql = "INSERT INTO shoppingcart (product, price, quantity) VALUES ($1::text, $2::float, $3::int)";
+	var values = [req.body.product, req.body.price, req.body.quantity];
 	pool.query(sql, values).then(function(result) {
 		res.status(201).send("Added");
 	}).catch(function(err) {
@@ -55,10 +55,34 @@ app.post("/api/items", function(req, res) {
 // selected via the {ID} part of the URL.
 // TODO Handle this URL with appropriate Database interaction.
 
-app.delete('/api/items/:id', function(req, res) {
+app.delete("/api/items/:id", function(req, res) {
 	var id = parseInt(req.params.id);
 	pool.query("DELETE FROM shoppingcart WHERE id = $1::int", [id]).then(function() {
 		res.send("Deleted Item ID:" + id);
+	}).catch(function(err) {
+		console.log(err);
+		res.status(500);
+		res.send("Server Error");
+	});
+});
+
+app.put("/api/items/add/:id", function(req, res) {
+	var id = parseInt(req.params.id);
+	var sql = "UPDATE shoppingcart SET quantity = quantity + 1 WHERE id = $1::int";
+	pool.query(sql, [id]).then(function(result) {
+		res.status(201).send("Added One To Quantity");
+	}).catch(function(err) {
+		console.log(err);
+		res.status(500);
+		res.send("Server Error");
+	});
+});
+
+app.put("/api/items/sub/:id", function(req, res) {
+	var id = parseInt(req.params.id);
+	var sql = "UPDATE shoppingcart SET quantity = quantity - 1 WHERE quantity > 1 and id = $1::int";
+	pool.query(sql, [id]).then(function(result) {
+		res.status(201).send("Subtracted One From Quantity");
 	}).catch(function(err) {
 		console.log(err);
 		res.status(500);

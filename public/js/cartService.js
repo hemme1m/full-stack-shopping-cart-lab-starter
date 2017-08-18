@@ -34,4 +34,12 @@ app.service("cartService", function($http) {
         // TODO Make the HTTP request to the server and return a promise.
     };
 
+    this.addQty = function(itemId) {
+        return $http.put("/api/items/add/" + itemId);
+    };
+
+    this.subQty = function(itemId) {
+        return $http.put("/api/items/sub/" + itemId);
+    }
+
 });
